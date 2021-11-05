@@ -4,6 +4,9 @@ const auth = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const request = require('request');
+const config = require('config');
+const { response } = require('express');
 
 // @route   GET api/profile/name
 // @desc    Get current users profile
@@ -256,7 +259,7 @@ router.put(
       res.json(profile);
     } catch (err) {
       console.error(err.message);
-      res.status(500).send('Server Error');
+      res.status(500).send('Internal Server Error');
     }
   }
 );
@@ -275,7 +278,33 @@ router.delete('/education/:edu_id', auth, async (req, res) => {
     return res.status(200).json(foundProfile);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ msg: 'Server error' });
+    return res.status(500).json({ msg: 'Internal Server error' });
+  }
+});
+
+// @route    GET api/profile/github/:username
+// @desc     Get user repos from Github
+// @access   Public
+router.get('/github/:username', async (req, res) => {
+  try {
+    const option = {
+      uri: `https://api.github.com/users/${req.params.username}/repos?per_page=5&sort=created:asc&client_id=${config.get('githubClientId')}&cliend_seceret=${config.get('githubSecret')}`,
+      method: 'GET',
+      headers: { 'user-agent': 'node.js' }
+    };
+
+    request(option, (error, response, body) => {
+      if (error) console.error(error);
+
+      if (response.statusCode !== 200) {
+        res.status(404).json({ msg: 'No GIthub Profile found' })
+      }
+
+      return res.json(JSON.parse(body));
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(404).json({ msg: 'No Github profile found' });
   }
 });
 
