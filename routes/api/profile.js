@@ -226,7 +226,7 @@ router.delete('/experience/:exp_id', auth, async (req, res) => {
     return res.status(200).json(profile);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ msg: 'Server error' });
+    return res.status(500).json({ msg: 'Internal Server error' });
   }
 });
 

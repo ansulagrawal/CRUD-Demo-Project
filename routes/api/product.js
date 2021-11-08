@@ -133,3 +133,44 @@ router.get('/', async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
+
+// 4.
+// @route    GET api/product/:id
+// @desc     Get product by ID
+// @access   Public
+router.get('/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ msg: 'Product not found' });
+    }
+    res.json(product);
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind == 'ObjectId') {
+      return res.status(404).json({ msg: 'Product not found' });
+    }
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// 5.
+// @route    DELETE api/product/:id
+// @desc     Delete product by ID
+// @access   Public
+router.delete('/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ msg: 'Product not found' });
+    }
+    await product.remove();
+    res.json({ msg: 'Product removed' });
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind == 'ObjectId') {
+      return res.status(404).json({ msg: 'Product not found' });
+    }
+    res.status(500).send('Internal Server Error');
+  }
+});
