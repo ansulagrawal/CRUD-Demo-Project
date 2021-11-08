@@ -11,6 +11,8 @@ const { response } = require('express');
 // Product Modal
 const Product = require('../../models/Product');
 
+
+// 1.
 // @route   POST api/product
 // @desc    Add New Product
 // @access  Public
@@ -18,7 +20,7 @@ router.post('/', [
   check('pname', 'Name is required!').notEmpty(),
   check('pprice', 'Price required!').notEmpty().isNumeric(),
   check('dateofmanufacture', 'dateof manufacture required!').notEmpty(),
-  check('pstocks', 'Stocks count required').notEmpty().isNumeric()
+  check('pstocks', 'Stocks counts required').notEmpty().isNumeric()
 ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -56,3 +58,78 @@ router.post('/', [
 );
 
 module.exports = router;
+
+
+// 2.
+// @route   GET api/profile/pupdate
+// @desc   Update Product details
+// @access  Public
+router.post('/pupdate', [
+  check('pname', 'Name is required!').notEmpty(),
+  check('pprice', 'Price required!').notEmpty().isNumeric(),
+  check('dateofmanufacture', 'dateof manufacture required!').notEmpty(),
+  check('pstocks', 'Stocks counts required').notEmpty().isNumeric()
+],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const {
+      pname,
+      pprice,
+      pdescription,
+      pstocks,
+      dateofmanufacture,
+      pimage,
+      ...rest
+    } = req.body;
+
+    try {
+      // Build product object as pdetails:
+      const pdetails = {}
+      let prod = await Product.findOne({ pname });
+      // console.log(product);
+      if (prod._id) pdetails._id = prod._id;
+      if (pprice) pdetails.pprice = pprice;
+      if (pdescription) pdetails.pdescription = pdescription;
+      if (pstocks) pdetails.pstocks = pstocks;
+      if (dateofmanufacture) pdetails.dateofmanufacture = dateofmanufacture;
+      if (pimage) pdetails.pimage = pimage;
+
+      // Update
+      let product = await Product.findOne({ pname });
+
+
+      // See if Product exits:
+      if (product) {
+        product = await Product.findOneAndUpdate(
+          { product: prod },
+          { $set: pdetails },
+          { new: true }
+        );
+        return res.json(product);
+      } else {
+        return res.status(400).json({ msg: 'Product not found' });
+      }
+    }
+    catch (err) {
+      console.log(err.message);
+      return res.status(500).send('Internal server Error');
+    }
+  }
+);
+
+// 3.
+// @route    GET api/product
+// @desc     Get all products
+// @access   Public
+router.get('/', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
