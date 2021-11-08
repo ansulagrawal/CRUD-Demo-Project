@@ -11,38 +11,48 @@ const { response } = require('express');
 // Product Modal
 const Product = require('../../models/Product');
 
-// @route   POST api/post
+// @route   POST api/product
 // @desc    Add New Product
 // @access  Public
-router.get('/', [
-  check('name', 'Name is required!').notEmpty(),
-  check('price', 'Price required!').notEmpty().isNumeric(),
-  check('dateofmanufacture', 'dateof manufacture required!').notEmpty().isDate(),
-  check('stocks', 'Stocks count required').notEmpty().isNumeric()
+router.post('/', [
+  check('pname', 'Name is required!').notEmpty(),
+  check('pprice', 'Price required!').notEmpty().isNumeric(),
+  check('dateofmanufacture', 'dateof manufacture required!').notEmpty(),
+  check('pstocks', 'Stocks count required').notEmpty().isNumeric()
 ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { name, price, description, stocks, dateofmanufacture } = req.body;
+    const { pname, pprice, pdescription, pstocks, dateofmanufacture, pimage } = req.body;
+    try {
+      let product = await Product.findOne({ pname });
 
-    // See if Product exits:
-    if (name) {
-      return res.status(400).json({ errors: [{ msg: 'Product Name already exits' }] })
+      // See if Product exits:
+      if (product) {
+        return res.status(400).json({ errors: [{ msg: 'Product Name already exits' }] })
+      }
+
+      product = new Product({
+        pname,
+        pprice,
+        pdescription,
+        dateofmanufacture,
+        pstocks,
+        pimage
+      })
+
+      // Save the product to the database
+      await product.save();
+      return res.send(product);
     }
-
-    product = new Product({
-      name,
-      price,
-      description,
-      stocks,
-      dateofmanufacture
-    })
-
-    // Save the product to the database
-    await product.save();
+    catch (err) {
+      console.log(err.message);
+      return res.status(500).send('Internal server Error');
+    }
   }
+
 );
 
 module.exports = router;
