@@ -44,6 +44,7 @@ router.post('/', [auth, [
 
     // destructure the request
     const {
+      money,
       company,
       website,
       location,
@@ -63,6 +64,7 @@ router.post('/', [auth, [
     // build a profile
     const profileFields = {}
     profileFields.user = req.user.id;
+    if (money) profileFields.money = money;
     if (company) profileFields.company = company;
     if (website) profileFields.website = website;
     if (location) profileFields.location = location;
@@ -226,7 +228,7 @@ router.delete('/experience/:exp_id', auth, async (req, res) => {
     return res.status(200).json(profile);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ msg: 'Server error' });
+    return res.status(500).json({ msg: 'Internal Server error' });
   }
 });
 
