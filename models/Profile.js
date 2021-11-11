@@ -5,6 +5,10 @@ const ProfileSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user'
   },
+  money: {
+    type: Number,
+    default: 10000
+  },
   company: {
     type: String
   },

@@ -44,6 +44,7 @@ router.post('/', [auth, [
 
     // destructure the request
     const {
+      money,
       company,
       website,
       location,
@@ -63,6 +64,7 @@ router.post('/', [auth, [
     // build a profile
     const profileFields = {}
     profileFields.user = req.user.id;
+    if (money) profileFields.money = money;
     if (company) profileFields.company = company;
     if (website) profileFields.website = website;
     if (location) profileFields.location = location;
